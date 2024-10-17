@@ -39,120 +39,34 @@ This plugin uses the following Google Cloud Platform services:
 
 - **Google Cloud Storage** - for storing the content blobs[Bucket]
 - **Google Cloud Firestore in Datastore mode** - for storing blobstore metadata
-- For the creation of Bucket and Datastore follow the links [**BUCKET**](https://cloud.google.com/storage/docs/creating-buckets#console), [**DATASTORE**]()
+- For the creation of Bucket and Datastore follow the links [**BUCKET**](https://cloud.google.com/storage/docs/creating-buckets#console), [**DATASTORE**]().
+- Create a service account with following IAM role:-
+  - **roles/editor** (for broad permissions including cloud-platform access)
+  - **roles/compute.viewer** (for read-only Compute Engine access)
+  - **roles/storage.objectAdmin** (for Cloud Storage write access)
+  - **roles/datastore.user** (for Datastore access)
+  - **roles/logging.logWriter** (for Cloud Logging write access) [ this role is optinal]
 
-- Create Mysql deployment with service as a NodePort. Below is the `mysql-deployment.yml` file.
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-spec:
-  selector:
-    matchLabels:
-      app: mysql
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - image: mysql:8.0
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: password
-        ports:
-        - containerPort: 3306
-          name: mysql
----
+![image](https://github.com/user-attachments/assets/24db1145-05cb-4355-8871-f45b1eff3bc3)
 
-apiVersion: v1
-kind: Service
-metadata:
-   name: mysql
-spec:
-   type: NodePort
-   selector:
-      app: mysql
-   ports:
-      - port: 3306
-        targetPort: 3306
-        nodePort: 30007
-```
-- Apply the deployment.
-```bash
-kubectl apply -f mysql-deployment.yaml
-```
-- Create Screte using below `mysql-secret.yaml` file.
+### Creating service-account.JSON file
+- Goto above GCP Console, search for `"service account"`, then click on the service account that we have just created above with the required roles.
+- Click on `Managed Keys`
+![image](https://github.com/user-attachments/assets/6f8e8737-6c1a-49af-953e-fa6e50887b29)
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mysql-secret
-type: kubernetes.io/basic-auth
-stringData:
-  password: test1234
-```
-Apply the above secret.
-```bash
-kubectl apply -f mysql-secret.yaml
+- Create a new key with `key type`= `json`.
+- Download the key and rename as a `service-account.json` file.
+### Deploy Nexus 3 with nexus-blobstore-google-cloud plugin
+
+To deploy Sonatype/Nexus3 with nexus-blobstore-google-cloud plugin , we must above two file(`service-account.json` and `plugin.kar`) on our local directory.
+Pull the `Sonatype/Nexus3:3.68` image.
+Run container with below command
+```docker
+docker run -d -p {PORT}:8081 --name {NAME} -v /PATH/TO/json_FILE:/run/secrets/service-account.json -v /APTH/OF/PLUGIN.KAR_FILE:/opt/sonatype/nexus/deploy sonatype/nexus3:3.68.0
 ```
 
-### Deploying Prometheus Operator
-```bash
-helm install prometheus prometheus-community/kube-prometheus-stack
-```
-### Creating Prometheus Server service as a NodePort
-We have to create the Prometheus server service as a NodePort service for exposing it to Grafana API's.
-Use below command for editing Prometheus service
-```bash
-kubectl edit svc/prometheus-kube-prometheus-prometheus
-```
-```bash
-kubectl get svc -A -o wide
-```
-![image](https://github.com/user-attachments/assets/fc33ccbf-56a4-49df-ac39-6832e307a0b4)
+**NOTE:-** Replace `{PORT}` and `{NAME}` with your sutiable value. Also replace `/PATH/TO/` with sutiable path.
 
 
-### Deploying Mysql-exporter
 
-- Use below file for scaping metrics from deployed Mysql Server.
-```yaml
-mysql:
-  db: ""
-  host: "192.168.49.2"
-  pass: "test1234"
-  port: 30007
-  protocol: ""
-  user: "root"
-
-serviceMonitor:
-  # enabled should be set to true to enable prometheus-operator discovery of this service
-  enabled: true
-  additionalLabels:
-    release: grafana
-    release: prometheus
-    app: mysql
-MySql Database
-```
-``**Note:-** Replace host,pass` and `port` according to your requirement.``
-
-- Install Mysql-exporter using below helm command
-
-```bash
-helm upgrade --install mysql-exporter prometheus-community/prometheus-mysql-exporter -f applyfile.yml
-```
-``**Note:-** Replace `applyfile.yml according to your requirement.``
-
-
-### Create Grafana Dashboard
-
-![Screenshot from 2024-07-09 18-58-55](https://github.com/Avinash828/Avinash-interview/assets/78551424/44fa15e8-15c4-44f6-986b-9776d49f1adb)
 
