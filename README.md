@@ -1,8 +1,8 @@
 # Nexus_GCPBucket_blob
-This repo consist of steps that are required to configure GCP bucket as a blob storage, by using "nexus-blobstore-google-cloud" plugin.
+This repo consists of steps that are required to configure GCP bucket as blob storage by using the `nexus-blobstore-google-cloud` plugin.
 
 
-## ARCHITECTURE
+## ARCHITECTURE DIAGRAM
 
 ![Untitled Diagram (1)](https://github.com/user-attachments/assets/b57f380e-c39f-4aa3-91b2-aafc038f1ac9)
 
@@ -50,7 +50,7 @@ This plugin uses the following Google Cloud Platform services:
 ![image](https://github.com/user-attachments/assets/24db1145-05cb-4355-8871-f45b1eff3bc3)
 
 ### Creating service-account.JSON file
-- Goto above GCP Console, search for `"service account"`, then click on the service account that we have just created above with the required roles.
+- Goto the above GCP Console, search for `"service account"`, then click on the service account that we have just created above with the required roles.
 - Click on `Managed Keys`
 ![image](https://github.com/user-attachments/assets/6f8e8737-6c1a-49af-953e-fa6e50887b29)
 
@@ -59,6 +59,8 @@ This plugin uses the following Google Cloud Platform services:
 ### Deploy Nexus 3 with nexus-blobstore-google-cloud plugin
 
 To deploy Sonatype/Nexus3 with nexus-blobstore-google-cloud plugin , we must above two file(`service-account.json` and `plugin.kar`) on our local directory.
+- `service-account.json` file need to to be copy at `/run/secrets/` location of nexus container. Similiraly we also need to copy `plugin.kar` file at `/opt/sonatype/nexus/deploy` folder.
+
 Pull the `Sonatype/Nexus3:3.68` image.
 Run container with below command
 ```docker
@@ -67,6 +69,23 @@ docker run -d -p {PORT}:8081 --name {NAME} -v /PATH/TO/json_FILE:/run/secrets/se
 
 **NOTE:-** Replace `{PORT}` and `{NAME}` with your sutiable value. Also replace `/PATH/TO/` with sutiable path.
 
+### Adding GCP Bucket as blob storage
+- Goto nexus setting, click on `blob storage`.
+- Click on ` Add new storage`, select `Google Colud Storage` as option.
+
+  ![image](https://github.com/user-attachments/assets/f06acc5f-37af-49e0-8ce7-10b9fd7ec45f)
+
+- Now fill out the details, like bucket name, region and path of ``service-account.json`` file.
+
+  ![image](https://github.com/user-attachments/assets/08eb5ccd-2e11-41fa-ab4c-5a5118b57660)
+
+- Once Nexus3 authenticates, the following blob storage will be created.
+
+  ![image](https://github.com/user-attachments/assets/76313470-f772-4776-a7e8-86f4a86ea4bc)
 
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#### Author: `Avinash Yadav`
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
