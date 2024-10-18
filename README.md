@@ -17,9 +17,10 @@ This repo consists of steps that are required to configure GCP bucket as blob st
 ### Download nexus-blobstore-google-cloud plugin
 - Go to the [website](https://search.maven.org/artifact/org.sonatype.nexus.plugins/nexus-blobstore-google-cloud) and download the following `.kar` file from the `archive`.
 
-![image](https://github.com/user-attachments/assets/9404f9e7-c8dd-473e-987f-ace59a092cef)
+   ![image](https://github.com/user-attachments/assets/9404f9e7-c8dd-473e-987f-ace59a092cef)
 
 - Command to download the `.kar` file
+
 ```shell
 wget https://repo1.maven.org/maven2/org/sonatype/nexus/plugins/nexus-blobstore-google-cloud/0.61.0/nexus-blobstore-google-cloud-0.61.0.kar
 ```
@@ -50,23 +51,24 @@ This plugin uses the following Google Cloud Platform services:
 ![image](https://github.com/user-attachments/assets/24db1145-05cb-4355-8871-f45b1eff3bc3)
 
 ### Creating service-account.JSON file
-- Goto the above GCP Console, search for `"service account"`, then click on the service account that we have just created above with the required roles.
+- Goto the above GCP Console, search for `"service account"`, then click on the service account that we have just created with the above required roles.
 - Click on `Managed Keys`
-![image](https://github.com/user-attachments/assets/6f8e8737-6c1a-49af-953e-fa6e50887b29)
+  ![image](https://github.com/user-attachments/assets/6f8e8737-6c1a-49af-953e-fa6e50887b29)
 
 - Create a new key with `key type`= `json`.
 - Download the key and rename as a `service-account.json` file.
 ### Deploy Nexus 3 with nexus-blobstore-google-cloud plugin
 
-To deploy Sonatype/Nexus3 with nexus-blobstore-google-cloud plugin , we must above two file(`service-account.json` and `plugin.kar`) on our local directory.
-- `service-account.json` file need to to be copy at `/run/secrets/` location of nexus container. Similiraly we also need to copy `plugin.kar` file at `/opt/sonatype/nexus/deploy` folder.
+To deploy Sonatype/Nexus3 with the nexus-blobstore-google-cloud plugin, we should have the above two file(`service-account.json` and `plugin.kar`) in our local directory.
 
-Pull the `Sonatype/Nexus3:3.68` image.
-Run container with below command
+- `service-account.json` file needs to be copied at `/run/secrets/` location of Nexus container. Similarly, we also need to copy the `plugin.kar` file to the `/opt/sonatype/nexus/deploy` folder.
+
+Pull the Sonatype/Nexus3:3.68 image.
+Run the container with the below command.
+
 ```docker
 docker run -d -p {PORT}:8081 --name {NAME} -v /PATH/TO/json_FILE:/run/secrets/service-account.json -v /APTH/OF/PLUGIN.KAR_FILE:/opt/sonatype/nexus/deploy sonatype/nexus3:3.68.0
 ```
-
 **NOTE:-** Replace `{PORT}` and `{NAME}` with your sutiable value. Also replace `/PATH/TO/` with sutiable path.
 
 ### Adding GCP Bucket as blob storage
